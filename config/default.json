@@ -1,0 +1,6 @@
+{
+  "MONGO_URL": "mongodb://localhost:27017/backend",
+  "SECRET": "jfneiornbgoiwebgiugbrewgrwe",
+  "ACCESS_TOKEN_EXP": "30m",
+  "PORT": 3000
+}

@@ -28,7 +28,7 @@ module.exports = {
     const { email, password } = req.validated.body
     const candidate = await User.findOne({ email })
     if (candidate && bcrypt.compareSync(password, candidate.password)) {
-      const { _id: sub, role } = candidate
+      const { _id: sub } = candidate
       const accessToken = issueToken({ sub }, { expiresIn: config.get('ACCESS_TOKEN_EXP') })
       const refreshToken = uuid()
 
@@ -46,7 +46,7 @@ module.exports = {
 
     if (dbToken) {
       await dbToken.remove()
-      const { _id: sub, role } = await User.findById(dbToken.sub)
+      const { _id: sub } = await User.findById(dbToken.sub)
 
       const accessToken = issueToken({ sub }, { expiresIn: config.get('ACCESS_TOKEN_EXP') })
       const refreshToken = uuid()
@@ -90,5 +90,15 @@ module.exports = {
     await following.save()
 
     res.sendStatus(201)
+  },
+
+  postAvatar: async (req, res) => {
+    const user = req.user
+    const { path: filePath } = req.file
+
+    user.avatar = filePath
+    await user.save()
+
+    res.status(201).json({ path: filePath })
   }
 }

@@ -59,12 +59,14 @@ module.exports = {
 
     createPost: Joi.object().keys({
       title: Joi.string().required(),
-      content: Joi.string().required()
+      content: Joi.string().required(),
+      image: Joi.string()
     }),
 
     postEdit: Joi.object().keys({
       title: Joi.string(),
-      content: Joi.string()
+      content: Joi.string(),
+      image: Joi.string()
     }),
 
     createComment: Joi.object().keys({

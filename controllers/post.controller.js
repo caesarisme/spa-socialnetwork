@@ -1,14 +1,13 @@
 // Model imports
-const User = require('../models/User')
 const Post = require('../models/Post')
 
 // Actions
 module.exports = {
   createPost: async (req, res) => {
-    const { title, content } = req.validated.body
+    const { title, content, image = '' } = req.validated.body
     const user = req.user
 
-    const newPost = new Post({ title, content })
+    const newPost = new Post({ title, content, image })
 
     user.posts.push(newPost)
     await user.save()
@@ -17,6 +16,16 @@ module.exports = {
     await newPost.save()
 
     res.status(201).json(newPost)
+  },
+
+  uploadImageForPost: async (req, res) => {
+    const { path } = req.file || { path: '' }
+
+    if (!path) {
+      return res.sendStatus(422)
+    }
+
+    res.status(201).json({ path })
   },
 
   editPostById: async (req, res) => {
@@ -112,8 +121,6 @@ module.exports = {
 
       if (isFeedPost) {
         posts.push(p)
-      } else {
-        console.log(isFeedPost)
       }
     })
 

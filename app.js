@@ -1,8 +1,8 @@
 const express = require('express')
 const logger = require('morgan')
 const mongoose = require('mongoose')
-const bodyParser = require('body-parser')
 const config = require('config')
+const path = require('path')
 
 mongoose.connect(config.get('MONGO_URL'), {
   useUnifiedTopology: true,
@@ -13,13 +13,15 @@ mongoose.connect(config.get('MONGO_URL'), {
 
 const app = express()
 
+// Middlewares
+app.use(logger('dev'))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use('/static/', express.static(path.join(__dirname, 'static'))) // Static
+
 // Route imports
 const userRoutes = require('./routes/user.routes')
 const postRoutes = require('./routes/post.routes')
-
-// Middlewares
-app.use(logger('dev'))
-app.use(bodyParser.json())
 
 // Routes
 app.use('/api/users', userRoutes)

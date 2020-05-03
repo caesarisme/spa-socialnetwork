@@ -3,13 +3,17 @@ const router = require('express-promise-router')()
 // Helpers
 const { jwtRequired } = require('../helpers/jwt.helpers')
 const { validateBody, validateParam, schemas } = require('../helpers/validation.helpers')
+const { uploadImage } = require('../helpers/upload.helper')
 
 // Controller
 const Controller = require('../controllers/post.controller')
 
 
 router.route('/')
-  .post([jwtRequired, validateBody(schemas.createPost)], Controller.createPost) // Create my post
+  .post(
+    [jwtRequired, validateBody(schemas.createPost)],
+    Controller.createPost
+  ) // Create my post
 
 router.route('/:postId')
   .patch(
@@ -17,6 +21,12 @@ router.route('/:postId')
     Controller.editPostById
   ) // Edit my post
   .delete([jwtRequired, validateParam('postId', schemas.idSchema)], Controller.deletePostById) // Delete my post
+
+router.route('/image')
+  .post(
+    [jwtRequired, uploadImage('post', 'image')],
+    Controller.uploadImageForPost
+  ) // Upload image for post
 
 router.route('/:postId/comments')
   .post(

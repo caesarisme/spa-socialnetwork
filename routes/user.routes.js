@@ -3,6 +3,8 @@ const router = require('express-promise-router')()
 // Helpers
 const { jwtRequired } = require('../helpers/jwt.helpers')
 const { validateBody, schemas } = require('../helpers/validation.helpers')
+const { uploadImage }  = require('../helpers/upload.helper')
+
 
 // Controller
 const Controller = require('../controllers/user.controller')
@@ -21,5 +23,8 @@ router.route('/logout')
 
 router.route('/follow/:followingId')
   .post(jwtRequired, Controller.followById)
+
+router.route('/avatar')
+  .post([jwtRequired, uploadImage('user', 'avatar')], Controller.postAvatar)
 
 module.exports = router

@@ -5,13 +5,16 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "server": "nodemon --ignore './client/' app.js",
+    "client": "npm run serve --prefix 'client'",
+    "dev": "concurrently 'npm run server' 'npm run client"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^4.0.1",
+    "concurrently": "^5.2.0",
     "config": "^3.3.1",
     "express": "^4.17.1",
     "express-promise-router": "^3.0.3",

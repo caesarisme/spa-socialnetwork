@@ -7,12 +7,34 @@ const routes = [
   {
     path: '/',
     name: 'Home',
+    meta: {
+      layout: 'main'
+    },
     component: () => import('./views/Home')
   },
   {
     path: '/friends',
     name: 'Friends',
+    meta: {
+      layout: 'main'
+    },
     component: () => import('./views/Friends')
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    meta: {
+      layout: 'auth'
+    },
+    component: () => import('./views/Login')
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    meta: {
+      layout: 'auth'
+    },
+    component: () => import('./views/Register')
   },
 ]
 

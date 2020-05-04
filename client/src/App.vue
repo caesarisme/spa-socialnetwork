@@ -1,15 +1,25 @@
 <template>
   <div id="app">
-    <component is="MainLayout" />
+    <component :is="layout" />
   </div>
 </template>
 
 <script>
   import MainLayout from './layouts/MainLayout'
+  import AuthLayout from './layouts/AuthLayout'
+  import EmptyLayout from './layouts/EmptyLayout'
 
   export default {
     components: {
-      MainLayout
+      MainLayout,
+      AuthLayout,
+      EmptyLayout
+    },
+
+    computed: {
+      layout() {
+        return `${this.$route.meta.layout || 'empty'}-layout`
+      }
     }
   }
 </script>

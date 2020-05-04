@@ -1,10 +1,12 @@
 <template>
-  
+  <div id="profile-info">
+
+  </div>
 </template>
 
 <script>
   export default {
-    name: "FriendProfile"
+    name: "ProfileInfo"
   }
 </script>
 

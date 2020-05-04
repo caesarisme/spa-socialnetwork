@@ -13,7 +13,7 @@
   import Chat from '../components/app/Chat'
 
   export default {
-    name: 'MainLayout',
+    name: 'main-layout',
 
     components: {
       Sidebar,

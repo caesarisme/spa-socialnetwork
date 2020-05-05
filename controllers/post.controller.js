@@ -115,6 +115,8 @@ module.exports = {
     const posts = []
 
     const allPosts = await Post.find({}, null, { sort: { date: -1 } })
+      .populate('author', { firstName: 1, lastName: 1, avatar: 1, email: 1 })
+
     allPosts.forEach(p => {
       const isFeedPost = !!user.followings.find(f => f._id.toString() === p.author._id.toString())
         || user._id.toString() === p.author._id.toString() // Is it my or my followers's post

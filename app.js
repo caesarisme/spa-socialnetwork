@@ -27,6 +27,11 @@ const postRoutes = require('./routes/post.routes')
 app.use('/api/users', userRoutes)
 app.use('/api/posts', postRoutes)
 
+app.get('/api/check', (req, res) => {
+  res.sendStatus(200)
+})
+
+
 // Catch 404 errors and forward them to error handler
 app.use((req, res, next) => {
   const err = new Error('Not found')

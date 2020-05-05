@@ -9,9 +9,27 @@
       </button>
     </section>
 
-    <div class="friend-list">
+    <h4 class="title">Followings</h4>
+    <Loader v-if="loading" />
+    <div v-else class="friend-list">
       <div
-              v-for="friend in friends"
+              v-for="friend in followings"
+              :key="friend._id"
+              class="friend"
+      >
+        <div class="avatar" :style="{ 'background-image': `url('${friend.avatar}')` }"></div>
+        <div class="info">
+          <div class="name">{{ `${friend.firstName} ${friend.lastName}` }}</div>
+          <div class="email">{{ friend.email }}</div>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="title">Followers</h4>
+    <Loader v-if="loading" />
+    <div v-else class="friend-list">
+      <div
+              v-for="friend in followers"
               :key="friend._id"
               class="friend"
       >
@@ -27,32 +45,28 @@
 </template>
 
 <script>
+  import { mapActions, mapGetters } from 'vuex'
+
   export default {
     name: "Friends",
 
     data: () => ({
-      friends: [
-        {
-          _id: '1',
-          firstName: 'Sofia',
-          lastName: 'Clark',
-          email: 'sofialclark@mail.com',
-          avatar: 'https://i.insider.com/5d70082b2e22af27a171f749?width=1100&format=jpeg&auto=webp'
-        }, {
-          _id: '2',
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'famousname@mail.com',
-          avatar: 'https://www.worldatlas.com/r/w1200-h701-c1200x701/upload/94/27/8b/shutterstock-637884949.jpg'
-        }, {
-          _id: '3',
-          firstName: 'Barack',
-          lastName: 'Obama',
-          email: 'usanambaone@mail.com',
-          avatar: 'https://nationalpostcom.files.wordpress.com/2019/11/barack-obama-1-1.png'
-        },
-      ]
-    })
+      loading: true
+    }),
+
+    computed: {
+      ...mapGetters(['followers', 'followings'])
+    },
+
+    methods: {
+      ...mapActions(['getFollowers', 'getFollowings'])
+    },
+
+    async mounted() {
+      await this.getFollowers()
+      await this.getFollowings()
+      this.loading = false
+    }
   }
 </script>
 
@@ -114,6 +128,12 @@
         color: #7C4F55;
       }
     }
+  }
+
+  h4.title {
+    color: #252745;
+    margin-bottom: 20px;
+    font-size: 20px;
   }
 
   .friend-list {

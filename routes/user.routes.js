@@ -2,7 +2,7 @@ const router = require('express-promise-router')()
 
 // Helpers
 const { jwtRequired } = require('../helpers/jwt.helpers')
-const { validateBody, schemas } = require('../helpers/validation.helpers')
+const { validateBody, validateParam, schemas } = require('../helpers/validation.helpers')
 const { uploadImage }  = require('../helpers/upload.helper')
 
 
@@ -21,10 +21,22 @@ router.route('/refresh')
 router.route('/logout')
   .post(jwtRequired, Controller.logout)
 
-router.route('/follow/:followingId')
+router.route('/follow/:followingId') // Todo: validate param
   .post(jwtRequired, Controller.followById)
 
 router.route('/avatar')
   .post([jwtRequired, uploadImage('user', 'avatar')], Controller.postAvatar)
+
+router.route('/data')
+  .get(jwtRequired, Controller.getCurrentUser)
+
+router.route('/data/:userId')
+  .get([jwtRequired, validateParam('userId', schemas.idSchema)], Controller.getUserById)
+
+router.route('/followers')
+  .get(jwtRequired, Controller.getCurrentUserFollowers)
+
+router.route('/followings')
+  .get(jwtRequired, Controller.getCurrentUserFollowings)
 
 module.exports = router

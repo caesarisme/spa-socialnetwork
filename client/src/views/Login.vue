@@ -1,5 +1,5 @@
 <template>
-  <form>
+  <form @submit.prevent="submitHandler">
     <h3>Login</h3>
     <h6>Sign in to your account to continue</h6>
 
@@ -7,12 +7,12 @@
       
       <div class="field">
         <label for="email">Email address</label>
-        <input type="text" id="email" placeholder="name@example.com">
+        <input v-model="email" type="text" id="email" placeholder="name@example.com">
       </div>
 
       <div class="field">
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Password">
+        <input v-model="password" type="password" id="password" placeholder="Password">
       </div>
       
     </div>
@@ -24,8 +24,27 @@
 </template>
 
 <script>
+
   export default {
-    name: "Login"
+    name: "Login",
+
+    data: () => ({
+      email: '', // Todo validation
+      password: ''
+    }),
+
+    methods: {
+      async submitHandler() {
+        try {
+          await this.$store.dispatch('login', {
+            email: this.email,
+            password: this.password
+          })
+
+          await this.$router.push('/')
+        } catch (e) {}
+      }
+    }
   }
 </script>
 

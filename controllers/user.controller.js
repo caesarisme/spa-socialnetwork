@@ -37,7 +37,7 @@ module.exports = {
       return res.status(200).json({ accessToken, refreshToken })
     }
 
-    res.sendStatus(401)
+    res.sendStatus(403)
   },
 
   refresh: async (req, res) => {
@@ -61,7 +61,7 @@ module.exports = {
 
   logout: async (req, res) => {
     const { _id: sub } = req.user
-    await RefreshToken.deleteMany({sub})
+    await RefreshToken.deleteMany({ sub })
     res.sendStatus(200)
   },
 
@@ -100,5 +100,45 @@ module.exports = {
     await user.save()
 
     res.status(201).json({ path: filePath })
+  },
+
+  getCurrentUser: async (req, res) => {
+    const user = req.user
+
+    const userData = {
+      _id: user._id.toString(),
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      avatar: user.avatar,
+      followings: user.followings,
+      followers: user.followers,
+      posts: user.posts
+    }
+
+    res.status(200).json(userData)
+  },
+
+  getCurrentUserFollowers: async (req, res) => {
+    const user = req.user
+    const { _id: userId } = user
+    const { followers } = await User.findById(userId, { followers: 1 }).populate('followers', '-password')
+
+    res.status(200).json(followers)
+  },
+
+  getCurrentUserFollowings: async (req, res) => {
+    const user = req.user
+    const { _id: userId } = user
+    const { followings } = await User.findById(userId, { followings: 1 }).populate('followings', '-password')
+
+    res.status(200).json(followings)
+  },
+
+  getUserById: async (req, res) => {
+    const { userId } = req.validated.params
+    const user = await User.findById(userId, '-password' ).populate('posts')
+
+    res.status(200).json(user)
   }
 }

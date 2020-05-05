@@ -49,7 +49,13 @@
   export default {
     name: "Post",
 
-    props: ['post']
+    props: ['post', 'author'],
+
+    mounted () {
+      if (typeof this.post.author === 'string'){
+        this.post.author = this.author
+      }
+    }
   }
 </script>
 

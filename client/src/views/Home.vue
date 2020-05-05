@@ -9,12 +9,15 @@
       </button>
     </section>
 
-    <PostList :posts="posts" />
+    <Loader v-if="loading" />
+
+    <PostList v-else :posts="feed" />
 
   </div>
 </template>
 
 <script>
+  import { mapActions, mapGetters } from 'vuex'
   import PostList from '../components/PostList'
 
   export default {
@@ -25,49 +28,21 @@
     },
 
     data: () => ({
-      posts: [
-        {
-          _id: 'postId1',
-          title: 'NASA selects three companies for human landing system awards',
-          content: 'WASHINGTON — NASA announced April 30 it has selected three companies to begin work on designs for human lunar landers, one of which the agency still hopes will be ready to land humans on the moon by the end of 2024.\n\nNASA selected teams led by Blue Origin, Dynetics and SpaceX for 10-month study contracts for the Human Landing System (HLS) program. The combined value of the awards is $967 million.',
-          image: 'https://static.vecteezy.com/system/resources/thumbnails/000/193/486/original/cosmos_2.jpg',
-          author: {
-            _id: 'authorId1',
-            firstName: 'John',
-            lastName: 'Doe',
-            avatar: 'https://www.worldatlas.com/r/w1200-h701-c1200x701/upload/94/27/8b/shutterstock-637884949.jpg'
-          },
-          date: new Date(),
-          comments: []
-        },
-        {
-          _id: 'postId2',
-          title: 'Starship passes key pressurization test',
-          content: 'WASHINGTON — A prototype of SpaceX’s Starship next-generation launch vehicle passed a pressurization test April 27, one that had destroyed three of its predecessors.\n\nThe Starship SN4 vehicle, on a pad at SpaceX’s facility in Boca Chica, Texas, was loaded with liquid nitrogen, a test designed to confirm its ability to hold cryogenic propellants at pressure. That test came a day after a pressurization test where the tanks were filled with gaseous nitrogen at ambient temperatures',
-          image: 'https://cdn.dribbble.com/users/499399/screenshots/5240261/rocket_illustration.png',
-          author: {
-            _id: 'authorId2',
-            firstName: 'Sofia',
-            lastName: 'Clark',
-            avatar: 'https://i.insider.com/5d70082b2e22af27a171f749?width=1100&format=jpeg&auto=webp'
-          },
-          date: new Date(),
-          comments: [
-            {
-              _id: 'commentId',
-              author: {
-                _id: 'commenterId',
-                firstName: 'John',
-                lastName: 'Doe',
-                avatar: 'https://www.worldatlas.com/r/w1200-h701-c1200x701/upload/94/27/8b/shutterstock-637884949.jpg'
-              },
-              content: 'Did you steal the post from spacenews.com?',
-              date: new Date()
-            }
-          ]
-        },
-      ]
-    })
+      loading: true
+    }),
+
+    computed: {
+      ...mapGetters(['feed'])
+    },
+
+    methods: {
+      ...mapActions(['getFeed'])
+    },
+
+    async mounted() {
+      await this.getFeed()
+      this.loading = false
+    }
   }
 </script>
 

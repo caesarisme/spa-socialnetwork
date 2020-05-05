@@ -5,6 +5,7 @@
       v-for="post in posts"
       :key="post._id"
       :post="post"
+      :author="author"
     />
 
   </div>
@@ -16,7 +17,7 @@
   export default {
     name: "PostList",
 
-    props: ['posts'],
+    props: ['posts', 'author'],
 
     components: {
       Post

@@ -15,7 +15,7 @@ module.exports = {
       const token = authHeader.split(' ')[1]
       jwt.verify(token, config.get('SECRET'), async (err, payload) => {
         if (err) {
-          return res.sendStatus(403)
+          return res.sendStatus(401)
         }
 
         req.user = await User.findById(payload.sub)

@@ -1,34 +1,49 @@
 <template>
   <div id="sidebar">
-    <h1 class="logo">SOCIAL<br><span>MARS</span>WORK</h1>
+    <h1 class="logo">Stay<br>Home</h1>
 
-    <div class="user-info">
-      <div class="avatar" style="background-image: url('https://media.proprofs.com/images/QM/user_images/2169923/1517751718.jpg');"></div>
+    <Loader v-if="!currentUser" />
+
+    <div v-else class="user-info">
+      <div class="avatar" :style="{'background-image': `url('${ currentUser.avatar }')`}"></div>
       <div class="info">
-        <div class="name">Clark Kent</div>
-        <div class="email">superman@mail.com</div>
+        <div class="name">{{ `${currentUser.firstName} ${currentUser.lastName}` }}</div>
+        <div class="email">{{ currentUser.email }}</div>
       </div>
     </div>
 
     <nav>
       <div class="basic">
-        <button class="active">
+        <router-link
+          to="/"
+          tag="button"
+          active-class="active"
+          exact
+        >
           <span class="icon"><i class="fas fa-rocket"></i></span>
           <span class="title">Home</span>
-        </button>
+        </router-link>
 
-        <button>
+        <router-link
+          to="/friends"
+          tag="button"
+          active-class="active"
+        >
           <span class="icon"><i class="fas fa-globe-americas"></i></span>
           <span class="title">Friends</span>
-        </button>
+        </router-link>
 
-        <button>
+        <router-link
+          to="/Profile"
+          tag="button"
+          active-class="active"
+        >
           <span class="icon"><i class="fas fa-user-astronaut"></i></span>
           <span class="title">My profile</span>
-        </button>
+        </router-link>
       </div>
 
-      <button class="logout">
+      <button class="logout" @click="logoutHandler">
         <span class="icon"><i class="fas fa-space-shuttle"></i></span>
         <span class="title">Logout</span>
       </button>
@@ -38,8 +53,28 @@
 </template>
 
 <script>
+
+  import { mapGetters, mapActions } from 'vuex'
+
   export default {
-    name: 'Sidebar'
+    name: 'Sidebar',
+
+    data: () => ({
+      loading: true
+    }),
+
+    computed: {
+      ...mapGetters(['currentUser'])
+    },
+
+    methods: {
+      ...mapActions(['logout']),
+      async logoutHandler() {
+        await this.logout()
+
+        this.$router.push('/login')
+      }
+    }
   }
 </script>
 
@@ -64,6 +99,7 @@
     text-align: right;
     font-size: 24px;
     color: #ffffff;
+    text-transform: uppercase;
   }
 
   .user-info {
@@ -114,10 +150,11 @@
       border: 2px solid #F1EEF6;
       text-align: left;
       margin-bottom: 20px;
+      transition: 200ms linear;
 
       span {
         display: inline-block;
-        line-height: 80px;
+        line-height: 76px;
         font-weight: 500;
 
         &.icon {
@@ -142,9 +179,22 @@
       }
 
       &.active {
-        border: none;
+        border: 2px solid #FFF4EA;
         background-color: #FFF4EA;
         color: #7C4F55;
+      }
+
+      &.active:hover {
+        background-color: #FFF4EA;
+      }
+
+      &:hover {
+        background-color: #F1EEF6;
+      }
+
+      &.logout:hover {
+        background-color: #FF6E69;
+        border: none;
       }
     }
   }

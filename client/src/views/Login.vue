@@ -8,22 +8,38 @@
       <div class="field">
         <label for="email">Email address</label>
         <input v-model="email" type="text" id="email" placeholder="name@example.com">
+        <p
+                v-if="$v.email.$dirty && !$v.email.email"
+                class="invalid"
+        >Enter correct email</p>
+        <p
+                class="invalid"
+                v-if="$v.email.$dirty && !$v.email.required"
+        >Email field is required</p>
       </div>
 
       <div class="field">
         <label for="password">Password</label>
         <input v-model="password" type="password" id="password" placeholder="Password">
+        <p
+                class="invalid"
+                v-if="$v.password.$dirty && !$v.password.required"
+        >Password is required</p>
+        <p
+                class="invalid"
+                v-if="$v.password.$dirty && !$v.password.minLength"
+        >Password should contain {{ $v.password.$params.minLength.min }} characters</p>
       </div>
-      
     </div>
 
     <button type="submit">Sign in &#8594;</button>
 
-    <p>Not registered? <a href="#">Create account</a></p>
+    <p class="warning">Not registered? <router-link to="/register">Create account</router-link></p>
   </form>
 </template>
 
 <script>
+  import { required, email, minLength } from 'vuelidate/lib/validators'
 
   export default {
     name: "Login",
@@ -33,8 +49,18 @@
       password: ''
     }),
 
+    validations: {
+      email: { email, required },
+      password: { required, minLength: minLength(8) }
+    },
+
     methods: {
       async submitHandler() {
+        if (this.$v.$invalid) {
+          this.$v.$touch()
+          return
+        }
+
         try {
           await this.$store.dispatch('login', {
             email: this.email,
@@ -69,7 +95,7 @@
       margin-bottom: 40px;
     }
 
-    p {
+    p.warning {
       margin-top: 30px;
       font-weight: 300;
       font-size: 18px;
@@ -79,6 +105,13 @@
         color: #252745;
         text-decoration: none;
       }
+    }
+
+    p.invalid {
+      font-size: 14px;
+      margin-top: 5px;
+      color: #FF6E69;
+      font-weight: 400;
     }
 
     .field {

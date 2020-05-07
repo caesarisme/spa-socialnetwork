@@ -34,7 +34,7 @@
         </router-link>
 
         <router-link
-          to="/Profile"
+          to="/profile"
           tag="button"
           active-class="active"
         >
@@ -110,6 +110,7 @@
 
     .avatar {
       background-size: cover;
+      background-position: center;
       width: 80px;
       height: 80px;
       border-radius: 30px;

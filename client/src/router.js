@@ -23,6 +23,15 @@ const routes = [
     component: () => import('./views/Friends')
   },
   {
+    path: '/profile',
+    name: 'Profile',
+    meta: {
+      layout: 'main',
+      auth: true
+    },
+    component: () => import('./views/Profile')
+  },
+  {
     path: '/profile/:userId',
     name: 'Profile',
     meta: {

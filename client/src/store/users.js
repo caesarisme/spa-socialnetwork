@@ -33,6 +33,32 @@ export default {
       .then(res => {
         return res
       })
-      .catch(e => Promise.reject(e))
+      .catch(e => Promise.reject(e)),
+
+    async search({}, email) {
+      return this._vm.$http.search({ email })
+        .then(res => {
+          return res
+        })
+        .catch(e => Promise.reject(e))
+    },
+
+    async followById({ dispatch }, userId) {
+      return this._vm.$http.followById({ userId })
+        .then(async res => {
+          await dispatch('getCurrentUserData')
+          return res
+        })
+        .catch(e => Promise.reject(e))
+    },
+
+    async unfollowById({ dispatch }, userId) {
+      return this._vm.$http.unfollowById({ userId })
+        .then(async res => {
+          await dispatch('getCurrentUserData')
+          return res
+        })
+        .catch(e => Promise.reject(e))
+    }
   },
 }

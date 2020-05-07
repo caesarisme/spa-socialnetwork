@@ -3,7 +3,7 @@
 
     <section class="header">
       <h3 class="title">My Feed</h3>
-      <button>
+      <button @click="() => this.newPostModalShow = true">
         <span class="icon"><i class="fas fa-plus"></i></span>
         <span class="title">New post</span>
       </button>
@@ -13,22 +13,27 @@
 
     <PostList v-else :posts="feed" />
 
+    <NewPostModal v-if="newPostModalShow" @close="() => { this.newPostModalShow = false }" />
+
   </div>
 </template>
 
 <script>
   import { mapActions, mapGetters } from 'vuex'
   import PostList from '../components/PostList'
+  import NewPostModal from '../components/modals/NewPostModal'
 
   export default {
     name: 'Home',
 
     components: {
+      NewPostModal,
       PostList
     },
 
     data: () => ({
-      loading: true
+      loading: true,
+      newPostModalShow: false
     }),
 
     computed: {

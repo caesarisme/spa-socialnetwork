@@ -25,7 +25,7 @@ module.exports = {
       return res.sendStatus(422)
     }
 
-    res.status(201).json({ path })
+    res.status(201).json({ path: `/${path}` })
   },
 
   editPostById: async (req, res) => {
@@ -80,10 +80,16 @@ module.exports = {
       author: user
     }
 
-    post.comments.push(comment)
-    await post.save()
+    const newPost = await Post.findByIdAndUpdate(postId,
+      {
+        $push: {
+          comments: comment
+        }
+      }, { new: true })
+      .populate('author')
+      .populate('comments.author')
 
-    res.status(201).json(comment)
+    res.status(201).json(newPost)
   },
 
   deleteCommentFromPostWithId: async (req, res) => {
@@ -116,6 +122,7 @@ module.exports = {
 
     const allPosts = await Post.find({}, null, { sort: { date: -1 } })
       .populate('author', { firstName: 1, lastName: 1, avatar: 1, email: 1 })
+      .populate('comments.author', '-password')
 
     allPosts.forEach(p => {
       const isFeedPost = !!user.followings.find(f => f._id.toString() === p.author._id.toString())

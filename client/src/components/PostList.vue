@@ -6,6 +6,7 @@
       :key="post._id"
       :post="post"
       :author="author"
+      @updatePost="$emit('updatePost')"
     />
 
   </div>

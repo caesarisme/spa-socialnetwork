@@ -6,120 +6,29 @@
 
       <div ref="messagesBlock" class="messages">
 
-        <div class="incoming message">
-          <div class="content">
-            <div class="header">
-              <span class="name">John Doe</span>
-              <span class="time">15:41</span>
-            </div>
-            <div class="body">
-              What is Lorem Ipsum?
-            </div>
-          </div>
-        </div>
-
-        <div class="incoming message">
-          <div class="content">
-            <div class="header">
-              <span class="name">John Doe</span>
-              <span class="time">15:41</span>
-            </div>
-            <div class="body">
-              What is Lorem Ipsum?
-            </div>
-          </div>
-        </div>
-
-        <div class="incoming message">
-          <div class="content">
-            <div class="header">
-              <span class="name">John Doe</span>
-              <span class="time">15:41</span>
-            </div>
-            <div class="body">
-              What is Lorem Ipsum?
-            </div>
-          </div>
-        </div>
-
-        <div class="incoming message">
-          <div class="content">
-            <div class="header">
-              <span class="name">John Doe</span>
-              <span class="time">15:41</span>
-            </div>
-            <div class="body">
-              What is Lorem Ipsum?
-            </div>
-          </div>
-        </div>
-
-        <div class="last incoming message">
-          <div class="avatar">
-            <div class="image" style="background-image: url('https://www.worldatlas.com/r/w1200-h701-c1200x701/upload/94/27/8b/shutterstock-637884949.jpg')"></div>
+        <div
+                v-for="(msg, idx) in messages"
+                :key="idx"
+                class="message"
+                :class="{
+                  'incoming': msg.type === 'incoming',
+                  'sent': msg.type === 'sent',
+                  'last': isLast(idx)
+                }"
+        >
+          <div v-if="isLast(idx) && msg.type === 'incoming'" class="avatar">
+            <div
+                    class="image"
+                    :style="{ 'background-image': `url(${ msg.avatar })` }"
+            ></div>
           </div>
           <div class="content">
-            <div class="header">
-              <span class="name">John Doe</span>
-              <span class="time">15:41</span>
+            <div v-if="msg.type === 'incoming'" class="header">
+              <span class="name">{{ msg.name }}</span>
+              <span class="time">{{ msg.time | date('time') }}</span>
             </div>
-            <div class="body">
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry
-            </div>
-          </div>
-        </div>
-
-        <div class="sent message">
-          <div class="content">
-            <div class="body">
-              What is Lorem Ipsum?
-            </div>
-            <span class="time">15:43</span>
-          </div>
-        </div>
-
-        <div class="last sent message">
-          <div class="content">
-            <div class="body">
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry
-            </div>
-            <span class="time">15:43</span>
-          </div>
-        </div>
-
-        <div class="incoming message">
-          <div class="content">
-            <div class="header">
-              <span class="name">Sofia Clark</span>
-              <span class="time">16:20</span>
-            </div>
-            <div class="body">
-              What is Lorem Ipsum?
-            </div>
-          </div>
-        </div>
-
-        <div class="last incoming message">
-          <div class="avatar">
-            <div class="image" style="background-image: url('https://i.insider.com/5d70082b2e22af27a171f749?width=1100&format=jpeg&auto=webp')"></div>
-          </div>
-          <div class="content">
-            <div class="header">
-              <span class="name">Sofia Clark</span>
-              <span class="time">16:21</span>
-            </div>
-            <div class="body">
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry
-            </div>
-          </div>
-        </div>
-
-        <div class="last sent message">
-          <div class="content">
-            <div class="body">
-              OK :)
-            </div>
-            <span class="time">16:40</span>
+            <div class="body">{{ msg.content }}</div>
+            <span v-if="msg.type === 'sent'" class="time">{{ msg.time | date('time') }}</span>
           </div>
         </div>
 
@@ -127,8 +36,8 @@
     </div>
 
     <div class="type-part">
-      <form>
-        <input type="text" placeholder="Type something...">
+      <form @submit.prevent="sendMessage">
+        <input v-model="message" type="text" placeholder="Type something...">
         <button type="submit"><i class="fas fa-space-shuttle"></i></button>
       </form>
     </div>
@@ -137,18 +46,79 @@
 </template>
 
 <script>
+  import { mapGetters, mapActions } from 'vuex'
+  import io from 'socket.io-client'
+
   export default {
     name: "Chat",
 
-    mounted() {
+    data: () => ({
+      socket: null,
+      message: '',
+      messages: []
+    }),
+
+    computed: {
+      ...mapGetters(['currentUser'])
+    },
+
+    methods: {
+      ...mapActions(['getCurrentUserData']),
+      isLast(idx) {
+        if (idx >= this.messages.length - 1) {
+          return true
+        } else {
+          return this.messages[idx].name !== this.messages[idx+1].name
+        }
+      },
+      connect() {
+        this.socket = io('http://localhost:3000/')
+
+        this.socket.on('sendMessage', message => {
+          this.messages = this.messages.concat({
+            ...message,
+            type: message.userId === this.currentUser._id
+              ? 'sent'
+              : 'incoming'
+          })
+          setTimeout(() => {
+            this.$refs.messagesBlock.scrollTop = this.$refs.messagesBlock.scrollHeight
+          }, 0)
+        })
+      },
+      setUser() {
+        this.socket.emit('setUser', {
+          _id: this.currentUser._id,
+          name: `${this.currentUser.firstName} ${this.currentUser.lastName}`,
+          avatar: `${this.currentUser.avatar}`
+        })
+      },
+      sendMessage() {
+        if (!this.message.trim()) {
+          return
+        }
+        this.socket.emit('newMessage', this.message)
+        this.message = ''
+      }
+    },
+
+    async mounted() {
+      await this.getCurrentUserData()
       this.$refs.messagesBlock.scrollTop = this.$refs.messagesBlock.scrollHeight
+      this.connect()
+      this.setUser()
     }
   }
 </script>
 
 <style scoped lang="less">
+  button:focus {
+    outline: none;
+  }
+
   #chat {
     position: fixed;
+    z-index: 1;
     top: 0;
     right: 0;
     display: flex;

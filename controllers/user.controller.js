@@ -92,6 +92,35 @@ module.exports = {
     res.sendStatus(201)
   },
 
+  unfollowById: async (req, res) => {
+    const me = req.user
+    const { followingId: hisId } = req.params
+    const he = await User.findById(hisId)
+
+    console.log(`${me.firstName} unfollows from ${ he.firstName }`)
+
+    if (!he) {
+      return res.sendStatus(404)
+    }
+
+    if (he._id.toString() === me._id.toString()) { // Can not follow to himself
+      return res.sendStatus(400)
+    }
+
+    if (!he.followers.find(f => f._id.toString() === me._id.toString())
+      || !me.followings.find(f => f._id.toString() === he._id.toString())) {
+      return res.sendStatus(400)
+    }
+
+    me.followings = me.followings.filter(f => f._id.toString() !== he._id.toString())
+    await me.save()
+
+    he.followers = he.followings.filter(f => f._id.toString() !== me._id.toString())
+    await he.save()
+
+    res.sendStatus(201)
+  },
+
   postAvatar: async (req, res) => {
     const user = req.user
     const { path: filePath } = req.file
@@ -99,7 +128,7 @@ module.exports = {
     user.avatar = filePath
     await user.save()
 
-    res.status(201).json({ path: filePath })
+    res.status(201).json({ path: `/${filePath}` })
   },
 
   getCurrentUser: async (req, res) => {
@@ -117,6 +146,18 @@ module.exports = {
     }
 
     res.status(200).json(userData)
+  },
+
+  editCurrentUser: async (req, res) => {
+    const user = req.user
+    const { firstName, lastName, avatar } = req.body
+
+    user.firstName = firstName || user.firstName
+    user.lastName = lastName || user.lastName
+    user.avatar = avatar || user.avatar
+    await user.save()
+
+    res.sendStatus(200)
   },
 
   getCurrentUserFollowers: async (req, res) => {
@@ -137,7 +178,17 @@ module.exports = {
 
   getUserById: async (req, res) => {
     const { userId } = req.validated.params
-    const user = await User.findById(userId, '-password' ).populate('posts')
+    const user = await User.findById(userId, '-password')
+      .populate({ path: 'posts', options: { sort: { date: -1 } }})
+      .populate({path: 'posts', populate: { path: 'author' }})
+      .populate({path: 'posts', populate: { path: 'comments.author' }})
+
+    res.status(200).json(user)
+  },
+
+  searchByEmail: async (req, res) => {
+    const { email } = req.validated.params
+    const user = await User.findOne({ email }, '-password')
 
     res.status(200).json(user)
   }

@@ -10,10 +10,14 @@
       {{ post.content }}
     </div>
     <div class="additional-info">
-      <div class="author">
+      <router-link
+              :to="`/profile/${post.author._id}`"
+              tag="div"
+              class="author"
+      >
         <div class="avatar" :style="{ 'background-image': `url('${ post.author.avatar }')` }"></div>
         <div class="name">{{ `${post.author.firstName} ${post.author.lastName}` }}</div>
-      </div>
+      </router-link>
 
       <div class="date">{{ post.date | date('datetime') }}</div>
     </div>
@@ -25,19 +29,27 @@
         :key="comment._id"
         class="comment"
       >
-        <div class="comment-avatar" :style="{ 'background-image': `url('${ comment.author.avatar }')` }"></div>
+        <router-link
+                :to="`/profile/${comment.author._id}`"
+                class="comment-avatar"
+                :style="{ 'background-image': `url('${ comment.author.avatar }')` }"
+        ></router-link>
         <div class="comment-body">
           <div class="name">{{ `${comment.author.firstName} ${comment.author.lastName}` }}</div>
           <div class="content">{{ comment.content }}</div>
           <div class="date">{{ comment.date | date('datetime') }}</div>
         </div>
-        <button class="delete"><i class="fas fa-trash-alt"></i></button>
+        <button
+                v-if="currentUser._id === post.author._id || currentUser._id === comment.author._id"
+                @click="() => {deleteHandler(comment._id)}"
+                class="delete"
+        ><i class="fas fa-trash-alt"></i></button>
       </div>
 
       <div class="new-comment">
-        <form>
+        <form @submit.prevent="submitComment">
           <input type="hidden" :value="post._id">
-          <input type="text" placeholder="Your comment...">
+          <input v-model="newComment" type="text" placeholder="Your comment...">
           <button type="submit"><i class="fas fa-space-shuttle"></i></button>
         </form>
       </div>
@@ -46,10 +58,39 @@
 </template>
 
 <script>
+  import { mapActions, mapGetters } from 'vuex'
+
   export default {
     name: "Post",
 
     props: ['post', 'author'],
+
+    data: () => ({
+      newComment: ''
+    }),
+
+    computed: {
+      ...mapGetters(['currentUser'])
+    },
+
+    methods: {
+      ...mapActions(['postComment', 'deleteComment']),
+      async submitComment() {
+        this.post = await this.postComment({
+          postId: this.post._id,
+          content: this.newComment
+        })
+        this.newComment = ''
+      },
+
+      async deleteHandler(commentId) {
+        await this.deleteComment({
+          postId: this.post._id,
+          commentId: commentId
+        })
+        this.$emit('updatePost')
+      }
+    },
 
     mounted () {
       if (typeof this.post.author === 'string'){

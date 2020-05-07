@@ -14,13 +14,17 @@ export default {
     setUnauthorized: s => s.isAuthorized = true,
     setCurrentUser: (s, p) => s.currentUser = p
   },
-  actions: { // Todo register
+  actions: {
     login: async ({ commit }, data) =>
       await Vue.prototype.$http.login(data)
         .then(() => {
           commit('setAuthorized')
         })
         .catch(e => Promise.reject(e)),
+
+    async register({}, data) {
+      return this._vm.$http.register(data)
+    },
 
     getCurrentUserData: async ({commit}) =>
       await Vue.prototype.$http.getCurrentUserData()
@@ -34,6 +38,15 @@ export default {
           .then(() => {
               commit('setUnauthorized')
           })
-          .catch(e => Promise.reject(e))
+          .catch(e => Promise.reject(e)),
+
+    async editUser({ dispatch }, data) {
+      return await this._vm.$http.editUser(data)
+        .then(async res => {
+          await dispatch('getCurrentUserData')
+          return res
+        })
+        .catch(e => Promise.reject(e))
+    }
   }
 }

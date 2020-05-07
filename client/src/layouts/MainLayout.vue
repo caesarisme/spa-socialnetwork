@@ -4,7 +4,7 @@
 
     <router-view />
 
-<!--    <Chat />-->
+    <Chat />
   </div>
 </template>
 

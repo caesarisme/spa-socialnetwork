@@ -3,7 +3,7 @@
 
     <section class="header">
       <h3 class="title">My Shuttle</h3>
-      <button>
+      <button @click="() => this.showAddFriendModal = true">
         <span class="icon"><i class="fas fa-plus"></i></span>
         <span class="title">Add Friend</span>
       </button>
@@ -12,46 +12,58 @@
     <h4 class="title">Followings</h4>
     <Loader v-if="loading" />
     <div v-else class="friend-list">
-      <div
+      <router-link
               v-for="friend in followings"
               :key="friend._id"
+              :to="`/profile/${friend._id}`"
               class="friend"
+              tag="div"
       >
         <div class="avatar" :style="{ 'background-image': `url('${friend.avatar}')` }"></div>
         <div class="info">
           <div class="name">{{ `${friend.firstName} ${friend.lastName}` }}</div>
           <div class="email">{{ friend.email }}</div>
         </div>
-      </div>
+      </router-link>
     </div>
 
     <h4 class="title">Followers</h4>
     <Loader v-if="loading" />
     <div v-else class="friend-list">
-      <div
+      <router-link
               v-for="friend in followers"
               :key="friend._id"
+              :to="`/profile/${friend._id}`"
               class="friend"
+              tag="div"
       >
         <div class="avatar" :style="{ 'background-image': `url('${friend.avatar}')` }"></div>
         <div class="info">
           <div class="name">{{ `${friend.firstName} ${friend.lastName}` }}</div>
           <div class="email">{{ friend.email }}</div>
         </div>
-      </div>
+      </router-link>
     </div>
+
+    <AddFriendModal v-if="showAddFriendModal" @close="() => this.showAddFriendModal = false" />
 
   </div>
 </template>
 
 <script>
+  import AddFriendModal from '../components/modals/AddFriendModal'
   import { mapActions, mapGetters } from 'vuex'
 
   export default {
     name: "Friends",
 
+    components: {
+      AddFriendModal
+    },
+
     data: () => ({
-      loading: true
+      loading: true,
+      showAddFriendModal: false
     }),
 
     computed: {
@@ -81,6 +93,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    color: #252745;
 
     h3.title {
       font-size: 28px;
@@ -98,7 +111,7 @@
 
       span {
         display: inline-block;
-        line-height: 80px;
+        line-height: 76px;
         font-weight: 500;
 
         &.icon {

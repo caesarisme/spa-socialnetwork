@@ -23,7 +23,7 @@ module.exports = {
       cb(null, true)
     },
     limits: {
-      fileSize: 200000
+      fileSize: 500000
     }
   }).single(field)
 }

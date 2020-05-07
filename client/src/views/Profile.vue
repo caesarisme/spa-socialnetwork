@@ -5,15 +5,26 @@
 
     <section v-if="!loading" class="header">
       <h3 class="title">{{ `${user.firstName}'s Profile` }}</h3>
-      <button>
+      <button @click="() => this.showEditProfileModal = true" v-if="isMyProfile">
         <span class="icon"><i class="fas fa-plus"></i></span>
+        <span class="title">Edit profile</span>
+      </button>
+      <button v-else-if="followBtnType === 'follow'" @click="followHandler" v-else>
+        <span class="icon"><i class="fas fa-user-plus"></i></span>
+        <span class="title">{{ followBtnType }}</span>
+      </button>
+      <button v-else-if="followBtnType === 'unfollow'" @click="unfollowHandler" v-else>
+        <span class="icon"><i class="fas fa-user-minus"></i></span>
         <span class="title">{{ followBtnType }}</span>
       </button>
     </section>
 
     <ProfileInfo v-if="!loading" :user="user" style="margin-bottom: 60px;" />
 
-    <PostList v-if="!loading" :posts="user.posts" :author="user" />
+    <PostList v-if="!loading" :posts="user.posts" :author="user" @updatePost="update" />
+
+    <EditProfileModal v-if="showEditProfileModal" @close="() => this.showEditProfileModal = false" />
+
 
   </div>
 </template>
@@ -22,42 +33,72 @@
   import { mapActions, mapGetters } from 'vuex'
   import ProfileInfo from '../components/ProfileInfo'
   import PostList from '../components/PostList'
+  import EditProfileModal from '../components/modals/EditProfileModal'
 
   export default {
     name: "Profile",
 
     components: {
       PostList,
-      ProfileInfo
+      ProfileInfo,
+      EditProfileModal
     },
 
     data: () => ({
       loading: true,
-      user: {}
+      user: {},
+      isMyProfile: false,
+      showEditProfileModal: false
     }),
 
     computed: {
       ...mapGetters(['currentUser']),
       followBtnType() {
         return this.currentUser.followings.includes(this.user._id)
-          ? 'follow'
-          : 'unfollow'
+          ? 'unfollow'
+          : 'follow'
       }
     },
 
     methods: {
-      ...mapActions(['getUserData'])
+      ...mapActions([ 'getUserData', 'getCurrentUserData', 'followById', 'unfollowById']),
+      async followHandler () {
+        await this.followById(this.user._id)
+        this.user = await this.getUserData(this.user._id) // Todo: check profile info update
+      },
+      async unfollowHandler () {
+        await this.unfollowById(this.user._id)
+        this.user = await this.getUserData(this.user._id) // Todo: check profile info update
+      },
+      async update() {
+        await this.getCurrentUserData()
+        const userId = this.$route.params.userId || this.currentUser._id
+        this.user = await this.getUserData(userId)
+        console.log(this.user)
+      }
     },
+
 
     async mounted() {
       const { userId } = this.$route.params
-      this.user = await this.getUserData(userId)
+      await this.getCurrentUserData()
+      this.user = await this.getUserData(this.currentUser._id)
+      this.isMyProfile = userId === this.currentUser._id || !userId
+      if (this.isMyProfile && !!userId) {
+        this.$router.push('/profile')
+      } else if (!!userId) {
+        this.user = await this.getUserData(userId)
+      }
       this.loading = false
     }
   }
 </script>
 
 <style scoped lang="less">
+  button:focus {
+    outline: none;
+  }
+
   section.header {
     display: flex;
     justify-content: space-between;
@@ -80,7 +121,7 @@
 
       span {
         display: inline-block;
-        line-height: 80px;
+        line-height: 76px;
         font-weight: 500;
 
         &.icon {

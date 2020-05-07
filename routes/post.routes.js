@@ -28,7 +28,7 @@ router.route('/image')
     Controller.uploadImageForPost
   ) // Upload image for post
 
-router.route('/:postId/comments')
+router.route('/:postId/comments') // Todo: Test endpoint postman
   .post(
     [jwtRequired, validateParam('postId', schemas.idSchema), validateBody(schemas.createComment)],
     Controller.addCommentToPostWithId

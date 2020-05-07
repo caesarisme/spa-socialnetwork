@@ -28,7 +28,12 @@ export default class Api {
     this.client.interceptors.response.use(
       r => r,
       async error => {
-        if (
+        if (error.response.status === 401 && error.config.retry) { // Todo: 322
+          this.setAccessToken(null)
+          this.setRefreshToken(null)
+        }
+
+        else if (
           !this.refreshToken ||
           error.response.status !== 401 ||
           error.config.retry
@@ -79,6 +84,10 @@ export default class Api {
     return data
   }
 
+  async register(data) {
+    await this.client.post('/api/users/register', data)
+  }
+
   async logout() {
     await this.client.post('/api/users/logout')
     this.setAccessToken(null)
@@ -108,5 +117,46 @@ export default class Api {
   async getUserById(userId) {
     const { data } = await this.client.get(`/api/users/data/${userId}`)
     return data
+  }
+
+  async postComment({ postId, content }) {
+    const { data } = await this.client.post(`/api/posts/${postId}/comments`, { content })
+    return data
+  }
+
+  async imageUpload({ formData }) {
+    const { data } = await this.client.post('/api/posts/image', formData)
+    return data
+  }
+
+  async postNewPost(data) {
+    await this.client.post('/api/posts', data)
+  }
+
+  async search({ email }) {
+    const { data } = await this.client.get(`/api/users/search/${email}`)
+    return data
+  }
+
+  async followById({ userId }) {
+    return await this.client.post(`/api/users/follow/${userId}`)
+  }
+
+  async unfollowById({ userId }) {
+    return await this.client.post(`/api/users/unfollow/${userId}`)
+  }
+
+  async deleteComment({ postId, commentId }) {
+    return await this.client.delete(`/api/posts/${postId}/comments/${commentId}`)
+  }
+
+  async avatarUpload({ formData }) {
+    const { data } = await this.client.post('/api/users/avatar', formData)
+    return data
+  }
+
+  async editUser(data) {
+    console.log(data)
+    return await this.client.patch('/api/users/data', data)
   }
 }

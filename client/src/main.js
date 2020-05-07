@@ -5,6 +5,9 @@ import store from './store'
 import Api from './api'
 import './registerServiceWorker'
 
+import Vuelidate from 'vuelidate'
+Vue.use(Vuelidate)
+
 import dateFilter from './filters/date.filter'
 Vue.filter('date', dateFilter)
 

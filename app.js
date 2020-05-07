@@ -3,12 +3,13 @@ const logger = require('morgan')
 const mongoose = require('mongoose')
 const config = require('config')
 const path = require('path')
+const Socketio = require('socket.io')
 
 mongoose.connect(config.get('MONGO_URL'), {
   useUnifiedTopology: true,
   useNewUrlParser: true,
   useCreateIndex: true,
-  useFindAndModify: true
+  useFindAndModify: false
 })
 
 const app = express()
@@ -55,4 +56,23 @@ app.use((err, req, res, next) => {
 
 // Start the server
 const PORT = config.get('PORT') || 3000
-app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`))
+const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`))
+
+const io = Socketio(server)
+
+io.on('connect', socket => {
+
+  socket.on('setUser', user => {
+    socket.user = user
+  })
+
+  socket.on('newMessage', message => {
+    io.sockets.emit('sendMessage', {
+      userId: socket.user._id,
+      name: socket.user.name,
+      avatar: socket.user.avatar,
+      time: new Date(),
+      content: message
+    })
+  })
+})
